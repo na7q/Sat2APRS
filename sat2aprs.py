@@ -47,17 +47,25 @@ def webhook():
     incoming_sms = request.form.get('Body', '')
     latitude = None
     longitude = None
+    comment = ""
 
     # Log incoming message
     print('Received Message:', incoming_sms)
 
-    # Search for latitude and longitude in the message using regular expressions
-    lat_long_match = re.search(r'Location:\s*(-?\d+\.\d+),(-?\d+\.\d+)', incoming_sms)
+    # Search for latitude, longitude, and comment in the message using regular expressions
+    lat_long_comment_match = re.search(r'(-?\d+\.\d+),(-?\d+\.\d+)\s*([^.\"\n]+)', incoming_sms)
 
-    if lat_long_match:
-        latitude = float(lat_long_match.group(1))
-        longitude = float(lat_long_match.group(2))
+    if lat_long_comment_match:
+        latitude = float(lat_long_comment_match.group(1))
+        longitude = float(lat_long_comment_match.group(2))
+        comment = lat_long_comment_match.group(3).strip()
+
+        # If the comment is "undefined", use the default comment 'text'
+        if comment.lower() == "undefined":
+            comment = text
+
         print('Detected Lat Long: ({}, {})'.format(latitude, longitude))
+        print('Detected Comment:', comment)
 
         # Convert latitude and longitude to DDMM.MM format without dashes
         lat_ddmm = decimal_to_ddmm(latitude)
@@ -65,15 +73,17 @@ def webhook():
 
         print('Converted Lat Long to DDMM.MM: {}, {}'.format(lat_ddmm, long_ddmm))
         print('{}/{}'.format(lat_ddmm, long_ddmm))
+        print('APRS Comment:', comment)
 
         # Send APRS packet
-        send_aprs_packet(aprsUser, latitude, longitude, text)
+        send_aprs_packet(aprsUser, latitude, longitude, comment)
 
     else:
-        print('No Lat Long detected.')
+        print('No Lat Long and Comment detected.')
 
     response = MessagingResponse()
     return str(response)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)
