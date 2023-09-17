@@ -204,9 +204,9 @@ def webhook():
 
         # Update the alias map if the new aprsCall is not in it
         for number, call in alias_map.items():
-            if call == aprsCall:
+            if call == aprsCall and number == from_number:
                 alias_map[number] = new_aprsCall
-                print('Updated alias map:', alias_map)
+                print('Updated alias map for number {}:'.format(number), alias_map)
                 
         # If the from_number is not in the alias map, add it with the new APRS call
         if from_number not in alias_map:
