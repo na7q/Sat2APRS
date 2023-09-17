@@ -8,7 +8,7 @@ import threading
 app = Flask(__name__)
 
 # APRS-IS login info
-serverHost = 'theconnectdesk.com'
+serverHost = 'rotate.aprs2.net'
 serverPort = 14580
 aprsUser = 'CALLSIGN'  # Login call
 aprsCall = None  # Default RF Call 
